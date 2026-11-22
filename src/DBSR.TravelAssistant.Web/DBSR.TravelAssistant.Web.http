@@ -1,0 +1,6 @@
+@DBSR.TravelAssistant.Web_HostAddress = http://localhost:5025
+
+GET {{DBSR.TravelAssistant.Web_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

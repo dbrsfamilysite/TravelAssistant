@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="DBSR.TravelAssistant.Core/DBSR.TravelAssistant.Core.csproj" />
+  <Project Path="DBSR.TravelAssistant.Infrastructure/DBSR.TravelAssistant.Infrastructure.csproj" />
+  <Project Path="DBSR.TravelAssistant.Tests/DBSR.TravelAssistant.Tests.csproj" />
+  <Project Path="DBSR.TravelAssistant.Web/DBSR.TravelAssistant.Web.csproj" />
+</Solution>

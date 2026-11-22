@@ -1,0 +1,21 @@
+# Local AI models
+models/
+
+# .NET build outputs
+**/bin/
+**/obj/
+
+# IDE files
+.idea/
+.vs/
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Local configuration and secrets
+*.user
+appsettings.Development.json
