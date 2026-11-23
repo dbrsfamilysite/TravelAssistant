@@ -1,12 +1,12 @@
 # DBSR Travel Assistant
 
-**AI-powered travel planning using .NET 10, Ollama, and Qwen 3.5**
+**AI-powered travel planning using .NET 10, Ollama, and Qwen 3.5 9B**
 
 ## 1. Project Overview
 
 DBSR Travel Assistant is a locally hosted, AI-powered travel planning application built using .NET 10 and a modular architecture.
 
-The application accepts a natural-language travel request, generates a structured travel itinerary, and provides estimated travel expenses.
+The application accepts a natural-language travel request, generates a structured multi-day travel itinerary, and provides estimated travel expenses.
 
 It uses **Ollama with Qwen 3.5 9B** to generate travel plans locally, without depending on paid cloud AI APIs.
 
@@ -20,7 +20,7 @@ It uses **Ollama with Qwen 3.5 9B** to generate travel plans locally, without de
 - Currency-aware budget calculations.
 - Structured JSON responses.
 - Validation of AI-generated travel plans.
-- Local AI inference using GPU acceleration where supported.
+- Local AI inference using available CPU/GPU acceleration.
 
 ## 2. Technology Stack
 
@@ -33,7 +33,7 @@ It uses **Ollama with Qwen 3.5 9B** to generate travel plans locally, without de
 | API | ASP.NET Core Minimal API |
 | Serialization | System.Text.Json |
 | Testing | xUnit |
-| Development environment | macOS |
+| Development environment | macOS / Windows / Linux |
 | AI hosting | Local machine |
 
 ### Local AI configuration
@@ -41,7 +41,7 @@ It uses **Ollama with Qwen 3.5 9B** to generate travel plans locally, without de
 - Model: `qwen3.5:9b`
 - Ollama API: `http://localhost:11434`
 - AI inference: Local
-- Model storage: `models/` directory under the project workspace
+- Model storage: Managed by Ollama, or optionally configured to use a local project directory.
 
 No paid AI API subscription is required for local inference.
 
@@ -52,48 +52,48 @@ The solution follows a modular architecture with separation between business log
 ### High-level architecture
 
 ```text
-                 USER
-                   |
-                   v
-          Travel Request
-                   |
-                   v
+                  USER
+                    |
+                    v
+             Travel Request
+                    |
+                    v
           ASP.NET Core Web API
-                   |
-                   v
-       ITravelPlanGenerator
-                   |
-                   v
-      OllamaTravelPlanGenerator
-                   |
-          +--------+--------+
-          |                 |
-          v                 v
-   TravelPromptBuilder   TravelPlanValidator
-          |
-          v
-      ITravelAiService
-          |
-          v
-   OllamaTravelAiService
-          |
-          v
-     Ollama HTTP API
-          |
-          v
-      Qwen 3.5 9B
-          |
-          v
-     Generated JSON
-          |
-          v
-   JSON Deserialization
-          |
-          v
-   Travel Plan Validation
-          |
-          v
-   Structured API Response
+                    |
+                    v
+         ITravelPlanGenerator
+                    |
+                    v
+       OllamaTravelPlanGenerator
+                    |
+           +--------+--------+
+           |                 |
+           v                 v
+    TravelPromptBuilder  TravelPlanValidator
+           |
+           v
+       ITravelAiService
+           |
+           v
+     OllamaTravelAiService
+           |
+           v
+       Ollama HTTP API
+           |
+           v
+        Qwen 3.5 9B
+           |
+           v
+       Generated JSON
+           |
+           v
+    JSON Deserialization
+           |
+           v
+    Travel Plan Validation
+           |
+           v
+    Structured API Response
 ```
 
 ### Project responsibilities
@@ -116,119 +116,177 @@ Contains the ASP.NET Core API, dependency injection configuration, and HTTP endp
 
 Contains unit tests and API integration tests.
 
-## 4. Solution Folder Structure
+## 4. Repository Structure
 
 ```text
-DBSR/
-└── TravelAssistant/
+TravelAssistant/
+│
+├── .gitignore
+├── global.json
+├── README.md
+│
+├── models/                         # Optional local AI model storage
+│   └── (Not committed to Git)
+│
+└── src/
+    ├── DBSR.TravelAssistant.slnx
     │
-    ├── models/
-    │   └── Ollama model storage
+    ├── DBSR.TravelAssistant.Core/
+    │   ├── AI/
+    │   ├── Accommodations/
+    │   ├── Budgets/
+    │   ├── Destinations/
+    │   ├── Itineraries/
+    │   ├── Preferences/
+    │   ├── Transportation/
+    │   ├── TravelInsurance/
+    │   ├── Travelers/
+    │   └── Trips/
     │
-    ├── src/
-    │   │
-    │   ├── DBSR.TravelAssistant.slnx
-    │   ├── global.json
-    │   │
-    │   ├── DBSR.TravelAssistant.Core/
-    │   │   │
-    │   │   ├── AI/
-    │   │   │   ├── ITravelAiService.cs
-    │   │   │   ├── ITravelPlanGenerator.cs
-    │   │   │   ├── TravelPromptBuilder.cs
-    │   │   │   ├── TravelPlanResponse.cs
-    │   │   │   ├── TravelPlanDayResponse.cs
-    │   │   │   ├── TravelPlanActivityResponse.cs
-    │   │   │   ├── TravelPlanExpenseResponse.cs
-    │   │   │   ├── TravelPlanJsonSerializer.cs
-    │   │   │   ├── TravelPlanValidator.cs
-    │   │   │   └── TravelPlanMapper.cs
-    │   │   │
-    │   │   ├── Accommodations/
-    │   │   │   ├── Accommodation.cs
-    │   │   │   ├── AccommodationBooking.cs
-    │   │   │   ├── AccommodationBookingStatus.cs
-    │   │   │   ├── AccommodationRoom.cs
-    │   │   │   ├── AccommodationGuest.cs
-    │   │   │   ├── AccommodationType.cs
-    │   │   │   └── AccommodationAmenity.cs
-    │   │   │
-    │   │   ├── Budgets/
-    │   │   │   ├── TripBudgetCalculator.cs
-    │   │   │   ├── TripBudgetSummary.cs
-    │   │   │   └── Budget domain models
-    │   │   │
-    │   │   ├── Itineraries/
-    │   │   │   └── Itinerary domain models
-    │   │   │
-    │   │   └── Trips/
-    │   │       └── Trip domain models
-    │   │
-    │   ├── DBSR.TravelAssistant.Infrastructure/
-    │   │   │
-    │   │   └── AI/
-    │   │       ├── OllamaTravelAiService.cs
-    │   │       └── OllamaTravelPlanGenerator.cs
-    │   │
-    │   ├── DBSR.TravelAssistant.Web/
-    │   │   └── Program.cs
-    │   │
-    │   └── DBSR.TravelAssistant.Tests/
-    │       └── UnitTest1.cs
+    ├── DBSR.TravelAssistant.Infrastructure/
+    │   └── AI/
+    │       ├── OllamaTravelAiService.cs
+    │       └── OllamaTravelPlanGenerator.cs
     │
-    └── README.md
+    ├── DBSR.TravelAssistant.Web/
+    │   ├── Program.cs
+    │   ├── appsettings.json
+    │   └── Properties/
+    │
+    └── DBSR.TravelAssistant.Tests/
+        ├── BudgetApiIntegrationTests.cs
+        ├── TravelAssistantApiFactory.cs
+        ├── TravelPlanApiIntegrationTests.cs
+        └── UnitTest1.cs
 ```
 
-*Note: This represents the main source files and folders. Additional project files, build output, and supporting files are omitted for readability.*
+*Note: This represents the main source files and folders. Additional project files and supporting files are omitted for readability.*
 
 ## 5. Prerequisites
 
-Install the following software:
+Before running the application, install:
 
-1. macOS or another supported development environment.
-2. .NET 10 SDK.
-3. Ollama.
-4. Qwen 3.5 9B model.
+1. Git
+2. .NET 10 SDK
+3. Ollama
+4. Qwen 3.5 9B model
 
-Verify the .NET installation:
+A development machine with sufficient memory and free disk space for the model is recommended. Actual inference performance depends on hardware, memory, and available CPU/GPU acceleration.
+
+### Install .NET 10
+
+Download:
+
+https://dotnet.microsoft.com/download/dotnet/10.0
+
+Verify installation:
 
 ```bash
 dotnet --version
 ```
 
-Expected version:
+The repository currently pins the SDK using `global.json`. The expected SDK is:
 
 ```text
 10.0.401
 ```
 
-Verify Ollama:
+If the SDK version is not installed, install the version specified in `global.json` or update the SDK pin after verifying compatibility.
+
+### Install Git
+
+Verify:
+
+```bash
+git --version
+```
+
+### Install Ollama
+
+Download:
+
+https://ollama.com/download
+
+Install the version appropriate for your operating system.
+
+Verify:
 
 ```bash
 ollama --version
 ```
 
-## 6. Local AI Setup
+## 6. Clone the Repository
 
-### Step 1: Install Ollama
+Open Terminal, PowerShell, or your preferred command-line application.
 
-Download and install Ollama:
+Clone the repository:
 
-https://ollama.com/download
+```bash
+git clone https://github.com/dbrsfamilysite/TravelAssistant.git
+```
 
-### Step 2: Download the Qwen model
+Navigate into the project:
+
+```bash
+cd TravelAssistant
+```
+
+Verify the repository structure:
+
+```bash
+ls
+```
+
+Expected main entries:
+
+```text
+.gitignore
+global.json
+README.md
+src/
+```
+
+The `models/` directory may not exist immediately after cloning. This is expected.
+
+**Important:** AI model files are intentionally excluded from GitHub because they occupy several gigabytes. Every developer must download the model locally.
+
+## 7. Local AI Setup
+
+### Step 1: Start Ollama
+
+On macOS and Windows, open the installed Ollama application.
+
+On Linux, start the Ollama service or run:
+
+```bash
+ollama serve
+```
+
+Keep Ollama running while using the Travel Assistant API.
+
+If Ollama is already running as a background service or desktop application, do not start a second server unnecessarily.
+
+### Step 2: Download Qwen 3.5 9B
+
+Run:
 
 ```bash
 ollama pull qwen3.5:9b
 ```
 
-### Step 3: Verify the installed model
+This downloads the model to the local machine.
+
+The initial download can take some time and requires several gigabytes of available storage.
+
+### Step 3: Verify the model
+
+Run:
 
 ```bash
 ollama list
 ```
 
-Expected model:
+Expected model entry:
 
 ```text
 NAME
@@ -236,6 +294,8 @@ qwen3.5:9b
 ```
 
 ### Step 4: Test local AI inference
+
+Run:
 
 ```bash
 ollama run qwen3.5:9b "Reply with exactly: Local AI is working."
@@ -247,7 +307,11 @@ Expected response:
 Local AI is working.
 ```
 
-### Step 5: Verify Ollama API
+This confirms that the model is installed and can generate a response locally.
+
+### Step 5: Verify the Ollama API
+
+Run:
 
 ```bash
 curl http://localhost:11434/api/tags
@@ -255,12 +319,44 @@ curl http://localhost:11434/api/tags
 
 The response should contain the installed Qwen model.
 
-## 7. Build the Solution
+### Step 6: Optional — Configure project-local model storage
 
-Navigate to the source directory:
+By default, Ollama manages its model files in its own local storage location.
+
+Developers who prefer to store models under the project workspace can configure the `OLLAMA_MODELS` environment variable.
+
+The project uses `models/` as its optional local storage directory. This directory is ignored by Git.
+
+**macOS example:**
 
 ```bash
-cd ~/Documents/DBSR/TravelAssistant/src
+mkdir -p "$HOME/Documents/DBSR/TravelAssistant/models"
+
+launchctl setenv OLLAMA_MODELS "$HOME/Documents/DBSR/TravelAssistant/models"
+```
+
+After changing the environment variable, completely quit and reopen the Ollama application so it receives the updated environment.
+
+**Linux example:**
+
+Configure `OLLAMA_MODELS` in the environment used to launch the Ollama service. If Ollama runs under systemd, configure the variable in its service environment and restart the service.
+
+**Windows example:**
+
+Set `OLLAMA_MODELS` as a user or system environment variable, then restart Ollama.
+
+The path must point to the actual model storage directory.
+
+If you change model storage after downloading a model, make sure the model is available in the newly configured location. You may need to download it again.
+
+Developers can skip this optional configuration and use Ollama's default model storage.
+
+## 8. Build the Solution
+
+From the repository root:
+
+```bash
+cd src
 ```
 
 Restore and build:
@@ -275,16 +371,18 @@ Expected result:
 Build succeeded.
 ```
 
-## 8. Run the Application
+## 9. Run the Application
 
-Start the Web API:
+Ensure Ollama is running and that the Qwen model is available.
+
+From the `src` directory, start the Web API:
 
 ```bash
 ASPNETCORE_URLS=http://localhost:5025 \
 dotnet run --project DBSR.TravelAssistant.Web/DBSR.TravelAssistant.Web.csproj
 ```
 
-Expected output:
+Expected output includes:
 
 ```text
 Now listening on: http://localhost:5025
@@ -298,21 +396,21 @@ The API communicates with Ollama through:
 http://localhost:11434
 ```
 
-Ensure Ollama is running before submitting travel requests.
+Keep the API terminal open while testing requests.
 
-## 9. Submit a Travel Request
+Open another terminal window for API testing.
+
+## 10. Submit a Travel Request
 
 The current API accepts a JSON request containing a `userRequest` string.
 
 ### API endpoint
 
 ```http
-POST /api/travel-plans/generate
+POST http://localhost:5025/api/travel-plans/generate
 ```
 
 ### Example CLI command
-
-Open another terminal window and execute:
 
 ```bash
 curl -X POST http://localhost:5025/api/travel-plans/generate \
@@ -366,15 +464,15 @@ curl -X POST http://localhost:5025/api/travel-plans/generate \
 
 *This JSON is an illustrative example of the response structure, not a guaranteed AI response.*
 
-## 10. How Travel Plan Generation Works
+The actual itinerary and costs are generated dynamically by the local AI model.
+
+## 11. How Travel Plan Generation Works
 
 The application processes a travel request through the following stages.
 
 ### Stage 1: User request
 
-The user provides travel details in natural language.
-
-For example:
+The user provides travel details in natural language, including:
 
 - Destination
 - Travel dates
@@ -418,15 +516,6 @@ Qwen processes the request locally and generates a JSON response.
 
 `TravelPlanJsonSerializer.cs` converts the generated JSON into strongly typed C# objects.
 
-This provides structured access to:
-
-- Trip details
-- Itinerary days
-- Activities
-- Estimated expenses
-
-Enum values are deserialized from strings rather than numeric values.
-
 ### Stage 5: Travel plan validation
 
 `TravelPlanValidator.cs` checks the generated plan.
@@ -457,7 +546,7 @@ A validated `TravelPlanResponse` is returned through the API.
 
 Database persistence is not yet implemented.
 
-## 11. Budget Management
+## 12. Budget Management
 
 The Core project contains a budget calculation engine.
 
@@ -470,13 +559,13 @@ The Core project contains a budget calculation engine.
 - Historical exchange-rate selection based on expense dates.
 - Budget validation.
 
-The AI-generated expenses are estimates, not confirmed bookings or actual payments.
+AI-generated expenses are estimates, not confirmed bookings or actual payments.
 
-## 12. Automated Testing
+## 13. Automated Testing
 
 The solution includes an xUnit test project.
 
-Run all tests:
+From the `src` directory, run:
 
 ```bash
 dotnet test DBSR.TravelAssistant.Tests/DBSR.TravelAssistant.Tests.csproj
@@ -495,7 +584,7 @@ Current test status:
 
 **Current result: 43 tests passed, 0 failed.**
 
-Build and test commands:
+Build and test:
 
 ```bash
 dotnet build DBSR.TravelAssistant.slnx
@@ -503,7 +592,66 @@ dotnet build DBSR.TravelAssistant.slnx
 dotnet test DBSR.TravelAssistant.Tests/DBSR.TravelAssistant.Tests.csproj
 ```
 
-## 13. Current Limitations
+## 14. Troubleshooting
+
+### Problem: `dotnet` command not found
+
+Install the .NET 10 SDK and reopen your terminal.
+
+Verify:
+
+```bash
+dotnet --version
+```
+
+### Problem: Ollama connection refused
+
+Make sure Ollama is running.
+
+Test:
+
+```bash
+curl http://localhost:11434/api/tags
+```
+
+If the API is unavailable, start Ollama using the appropriate method for your operating system.
+
+### Problem: Model not found
+
+Check installed models:
+
+```bash
+ollama list
+```
+
+Download the required model:
+
+```bash
+ollama pull qwen3.5:9b
+```
+
+### Problem: API cannot connect to Ollama
+
+Verify:
+
+1. Ollama is running.
+2. The Ollama API is accessible at `http://localhost:11434`.
+3. The model name matches `qwen3.5:9b`.
+4. The model is installed in the storage location used by the running Ollama service.
+
+### Problem: AI generation takes too long
+
+Model inference time depends on:
+
+- Available RAM.
+- CPU/GPU hardware.
+- Model loading time.
+- Prompt size.
+- Number of requested itinerary activities.
+
+Allow sufficient time for the first model load and generation.
+
+## 15. Current Limitations
 
 The current implementation is an AI-powered backend foundation.
 
@@ -522,7 +670,7 @@ The following items are not yet complete:
 
 The local AI model does not automatically access real-time travel information. Attraction information, opening hours, and prices must be treated as unverified unless separately checked against reliable sources.
 
-## 14. Development Roadmap
+## 16. Development Roadmap
 
 ### Phase 1 – Backend and Local AI Foundation
 
@@ -576,9 +724,7 @@ The local AI model does not automatically access real-time travel information. A
 - [ ] Add deployment configuration.
 - [ ] Add performance and security testing.
 
-## 15. Design Principles
-
-The application follows these principles:
+## 17. Design Principles
 
 1. **Local-first AI:** Run inference locally using Ollama and avoid paid cloud AI APIs during initial development.
 2. **Separation of concerns:** Keep business logic independent of AI infrastructure.
@@ -586,8 +732,9 @@ The application follows these principles:
 4. **Validation before acceptance:** Validate AI-generated plans before returning them.
 5. **Extensibility:** Keep the architecture ready for additional AI models, UI development, databases, and travel integrations.
 6. **Transparent estimates:** Clearly distinguish estimated costs from confirmed prices and actual expenses.
+7. **Reproducible setup:** Document the required SDK, model, and configuration so developers can run the application independently.
 
-## 16. Project Outcome
+## 18. Project Outcome
 
 DBSR Travel Assistant currently provides a working .NET 10 backend capable of accepting a natural-language travel request, processing it through a locally hosted Qwen model, and returning a structured travel plan with itinerary activities and estimated expenses.
 
@@ -601,6 +748,7 @@ The foundation includes:
 - Budget calculation.
 - 43 passing automated tests.
 - A working end-to-end API generation flow.
+- Documented local developer setup.
 
 **The next milestone is the development of the user interface**, where users will enter their destination, travel dates, number of travellers, budget, and additional requirements. The UI will construct the `userRequest` and send it to the existing API.
 
@@ -611,3 +759,14 @@ The foundation includes:
 **AI Runtime:** Ollama  
 **Model:** Qwen 3.5 9B  
 **Current Status:** Backend foundation completed; UI development next.
+
+
+Screenshot Directory
+
+docs/
+└── screenshots/
+    ├── 01-api-running.png
+    ├── 02-travel-plan-output.png
+    └── 03-formatted-json-response.png
+
+These screenshots provide a visual reference for developers setting up, running, and testing the DBSR Travel Assistant locally.
